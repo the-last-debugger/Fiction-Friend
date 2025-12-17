@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 type TasteContextType = {
 	selectedGenres: string[];
@@ -9,7 +9,14 @@ type TasteContextType = {
 const TasteContext = createContext<TasteContextType | null>(null);
 
 export function TasteProvider({ children }: { children: React.ReactNode }) {
-	const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+	const [selectedGenres, setSelectedGenres] = useState<string[]>(() => {
+		const saved = localStorage.getItem("selectedGenres");
+		return saved ? JSON.parse(saved) : [];
+	});
+
+	useEffect(() => {
+		localStorage.setItem("selectedGenres", JSON.stringify(selectedGenres));
+	}, [selectedGenres]);
 
 	function toggleGenre(genre: string) {
 		setSelectedGenres((prev) =>
@@ -19,6 +26,7 @@ export function TasteProvider({ children }: { children: React.ReactNode }) {
 
 	function clearGenres() {
 		setSelectedGenres([]);
+		localStorage.removeItem("selectedGenres");
 	}
 
 	return (

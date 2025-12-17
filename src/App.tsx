@@ -15,7 +15,7 @@ function App() {
 				<Route path="/category-select" element={<CategorySelect />} />
 				<Route path="/setup" element={<TasteSetup />} />
 				<Route path="/recommendations" element={<Recommendations />} />
-				<Route path="/details/:id" element={<Details />} />
+				<Route path="/details" element={<Details />} />
 				<Route path="/library" element={<Library />} />
 			</Routes>
 		</>

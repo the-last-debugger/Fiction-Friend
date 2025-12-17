@@ -1,4 +1,4 @@
-const movieGenres = [
+export const movieGenres = [
 	"Action",
 	"Drama",
 	"Sci-fi",
@@ -8,7 +8,8 @@ const movieGenres = [
 	"Fantasy",
 	"Teen",
 ];
-const tvGenres = [
+
+export const tvGenres = [
 	"Sitcom",
 	"Action",
 	"Drama",
@@ -20,8 +21,10 @@ const tvGenres = [
 	"Crime",
 	"Teen",
 ];
-const bookGenres = ["Fantasy", "Mystery", "Non-fiction"];
-const podcastGenres = ["Tech", "Comedy", "True Crime"];
+
+export const bookGenres = ["Fantasy", "Mystery", "Non-fiction"];
+
+export const podcastGenres = ["Tech", "Comedy", "True Crime"];
 
 export function getGenres(category: string | null) {
 	switch (category) {
