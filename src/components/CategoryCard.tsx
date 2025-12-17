@@ -2,6 +2,7 @@ type CategoryCardProps = {
 	label: string;
 	icon?: React.ReactNode;
 	onClick?: () => void;
+	className?: string;
 };
 
 export default function CategoryCard({

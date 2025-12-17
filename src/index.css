@@ -1,8 +1,11 @@
+/* Tailwind + animation utilities */
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Dark mode variant */
 @custom-variant dark (&:is(.dark *));
 
+/* Theme tokens mapped to CSS variables */
 @theme inline {
 	--radius-sm: calc(var(--radius) - 4px);
 	--radius-md: calc(var(--radius) - 2px);
@@ -11,6 +14,8 @@
 	--radius-2xl: calc(var(--radius) + 8px);
 	--radius-3xl: calc(var(--radius) + 12px);
 	--radius-4xl: calc(var(--radius) + 16px);
+
+	/* Color aliases */
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
 	--color-card: var(--card);
@@ -29,6 +34,8 @@
 	--color-border: var(--border);
 	--color-input: var(--input);
 	--color-ring: var(--ring);
+
+	/* Chart + sidebar colors */
 	--color-chart-1: var(--chart-1);
 	--color-chart-2: var(--chart-2);
 	--color-chart-3: var(--chart-3);
@@ -44,14 +51,19 @@
 	--color-sidebar-ring: var(--sidebar-ring);
 }
 
+/* Light mode defaults */
 :root {
 	--radius: 0.625rem;
+
+	/* Base palette */
 	--background: oklch(1 0 0);
 	--foreground: oklch(0.145 0 0);
 	--card: oklch(1 0 0);
 	--card-foreground: oklch(0.145 0 0);
 	--popover: oklch(1 0 0);
 	--popover-foreground: oklch(0.145 0 0);
+
+	/* Brand + UI colors */
 	--primary: oklch(0.205 0 0);
 	--primary-foreground: oklch(0.985 0 0);
 	--secondary: oklch(0.97 0 0);
@@ -61,9 +73,13 @@
 	--accent: oklch(0.97 0 0);
 	--accent-foreground: oklch(0.205 0 0);
 	--destructive: oklch(0.577 0.245 27.325);
+
+	/* Borders + inputs */
 	--border: oklch(0.922 0 0);
 	--input: oklch(0.922 0 0);
 	--ring: oklch(0.708 0 0);
+
+	/* Charts + sidebar */
 	--chart-1: oklch(0.646 0.222 41.116);
 	--chart-2: oklch(0.6 0.118 184.704);
 	--chart-3: oklch(0.398 0.07 227.392);
@@ -79,6 +95,7 @@
 	--sidebar-ring: oklch(0.708 0 0);
 }
 
+/* Dark mode overrides */
 .dark {
 	--background: oklch(0.145 0 0);
 	--foreground: oklch(0.985 0 0);
@@ -86,6 +103,8 @@
 	--card-foreground: oklch(0.985 0 0);
 	--popover: oklch(0.205 0 0);
 	--popover-foreground: oklch(0.985 0 0);
+
+	/* Brand + UI */
 	--primary: oklch(0.922 0 0);
 	--primary-foreground: oklch(0.205 0 0);
 	--secondary: oklch(0.269 0 0);
@@ -95,9 +114,13 @@
 	--accent: oklch(0.269 0 0);
 	--accent-foreground: oklch(0.985 0 0);
 	--destructive: oklch(0.704 0.191 22.216);
+
+	/* Borders + inputs */
 	--border: oklch(1 0 0 / 10%);
 	--input: oklch(1 0 0 / 15%);
 	--ring: oklch(0.556 0 0);
+
+	/* Charts + sidebar */
 	--chart-1: oklch(0.488 0.243 264.376);
 	--chart-2: oklch(0.696 0.17 162.48);
 	--chart-3: oklch(0.769 0.188 70.08);
@@ -113,6 +136,7 @@
 	--sidebar-ring: oklch(0.556 0 0);
 }
 
+/* Base element styling */
 @layer base {
 	* {
 		@apply border-border outline-ring/50;
@@ -122,6 +146,7 @@
 	}
 }
 
+/* Modal animations */
 @keyframes fadeInScale {
 	0% {
 		opacity: 0;
@@ -144,10 +169,67 @@
 	}
 }
 
+/* Animation utilities */
 .animate-fadeInScale {
 	animation: fadeInScale 0.2s ease-out forwards;
 }
 
 .animate-fadeOutScale {
 	animation: fadeOutScale 0.15s ease-in forwards;
+}
+
+@keyframes fadeInBackdrop {
+	0% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+
+@keyframes fadeOutBackdrop {
+	0% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+	}
+}
+
+.animate-backdropIn {
+	animation: fadeInBackdrop 0.2s ease-out forwards;
+}
+
+.animate-backdropOut {
+	animation: fadeOutBackdrop 0.15s ease-in forwards;
+}
+
+@keyframes slideUpIn {
+	0% {
+		opacity: 0;
+		transform: translateY(20px) scale(0.98);
+	}
+	100% {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
+@keyframes slideUpOut {
+	0% {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+	100% {
+		opacity: 0;
+		transform: translateY(20px) scale(0.98);
+	}
+}
+
+.animate-slideUpIn {
+	animation: slideUpIn 0.25s ease-out forwards;
+}
+
+.animate-slideUpOut {
+	animation: slideUpOut 0.2s ease-in forwards;
 }
