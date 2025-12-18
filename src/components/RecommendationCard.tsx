@@ -12,7 +12,17 @@ export default function RecommendationCard({
 			className="w-full flex flex-col items-center cursor-pointer"
 			onClick={onClick}
 		>
-			<section className="w-40 h-56 bg-white rounded-md mb-3" />
+			{item.poster ? (
+				<img
+					src={item.poster}
+					alt={item.title}
+					className="w-40 h-56 object-cover rounded-md mb-3"
+				/>
+			) : (
+				<div className="w-40 h-56 bg-gray-800 rounded-md mb-3 flex items-center justify-center text-gray-400">
+					No Poster
+				</div>
+			)}
 
 			<h2 className="text-center text-lg font-semibold">
 				{item.title}

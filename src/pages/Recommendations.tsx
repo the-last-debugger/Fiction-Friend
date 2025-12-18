@@ -1,3 +1,4 @@
+// src/pages/Recommendations.tsx
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTaste } from "@/context/TasteContext";
@@ -9,44 +10,73 @@ import { usePageFadeIn } from "@/hooks/usePageFadeIn";
 import { useFilteredRecommendations } from "@/hooks/useFilteredRecommendations";
 import { useProgressiveLoad } from "@/hooks/useProgressiveLoad";
 
+import { useMovies } from "@/hooks/useMovies";
+
 import RecommendationCard from "@/components/RecommendationCard";
 import SearchBar from "@/components/SearchBar";
 import Details from "./Details";
 import RecommendationsSkeleton from "@/components/RecommendationsSkeleton";
 
 function Recommendations() {
-	const loading = usePageFadeIn();
+	const pageLoading = usePageFadeIn();
 
 	const [params] = useSearchParams();
 	const category = params.get("category") as keyof typeof recommendations;
 
 	const { selectedGenres } = useTaste();
-	const items = recommendations[category] || [];
 
-	const filtered = useFilteredRecommendations(items, selectedGenres);
+	// ✅ Movies now use discover endpoint with genre filtering
+	const {
+		data: movieData,
+		loading: movieLoading,
+		loadMore: loadMoreMovies,
+		hasMore: hasMoreMovies,
+	} = useMovies(selectedGenres);
 
+	// ✅ Choose data source
+	const items =
+		category === "movie" ? movieData : recommendations[category] || [];
+
+	// ✅ Combined loading state
+	const isLoading = pageLoading || (category === "movie" && movieLoading);
+
+	// ✅ Only apply local filtering for non-movie categories
+	const filtered =
+		category === "movie"
+			? items
+			: useFilteredRecommendations(items, selectedGenres);
+
+	// ✅ Progressive load for non-movie categories
 	const { visibleCount, loadMore, sentinelRef, reachedLimit, reachedEnd } =
 		useProgressiveLoad(filtered.length);
 
 	const visibleItems = filtered.slice(0, visibleCount);
 
+	// ✅ Details modal
 	const [activeItem, setActiveItem] = useState<RecommendationItem | null>(null);
+
+	// ✅ Infinite scroll trigger
+	function handleLoadMore() {
+		if (category === "movie") {
+			loadMoreMovies();
+		} else {
+			loadMore();
+		}
+	}
 
 	return (
 		<div className="relative bg-black min-h-screen text-white">
 			<div
 				className={`p-12 transition-opacity duration-700 ${
-					loading ? "opacity-0" : "opacity-100"
+					isLoading ? "opacity-0" : "opacity-100"
 				}`}
 			>
 				<h1 className="text-3xl mb-6">Your {category} Recommendations</h1>
 
 				<SearchBar category={category} />
 
-				{filtered.length === 0 && !loading && (
-					<p className="text-red-600 mb-6">
-						No matches found. Try selecting more genres.
-					</p>
+				{filtered.length === 0 && !isLoading && (
+					<p className="text-red-600 mb-6">No matches found.</p>
 				)}
 
 				<div className="grid grid-cols-3 w-full gap-6">
@@ -59,13 +89,18 @@ function Recommendations() {
 					))}
 				</div>
 
+				{/* sentinel triggers infinite scroll */}
 				{!reachedLimit && !reachedEnd && (
-					<div ref={sentinelRef} className="h-10" />
+					<div
+						ref={sentinelRef}
+						className="h-10"
+						onClick={handleLoadMore} // fallback if IntersectionObserver fails
+					/>
 				)}
 
 				{reachedLimit && !reachedEnd && (
 					<button
-						onClick={loadMore}
+						onClick={handleLoadMore}
 						className="mt-6 px-6 py-3 bg-white/10 border border-white/20 rounded-lg text-white hover:bg-white/20 transition"
 					>
 						Load More
@@ -73,7 +108,7 @@ function Recommendations() {
 				)}
 			</div>
 
-			{loading && (
+			{isLoading && (
 				<div className="absolute inset-0 z-30 bg-black">
 					<RecommendationsSkeleton />
 				</div>

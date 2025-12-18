@@ -2,10 +2,12 @@ export type RecommendationItem = {
 	title: string;
 	genres: string[];
 	rating?: number;
+	poster?: string | null;
+	backdrop?: string | null;
 };
 
 export const recommendations: Record<string, RecommendationItem[]> = {
-	movie: [
+	/*movie: [
 		{ title: "Inception", genres: ["Sci-fi", "Action"], rating: 9.0 },
 		{ title: "The Notebook", genres: ["Drama"], rating: 8.0 },
 		{ title: "The Hunger Games", genres: ["Teen", "Action"], rating: 9.0 },
@@ -187,7 +189,7 @@ export const recommendations: Record<string, RecommendationItem[]> = {
 		{ title: "Silverbound Echoes", genres: ["Fantasy"], rating: 8.3 },
 		{ title: "Crimson Shoreline", genres: ["Mystery"], rating: 7.8 },
 		{ title: "Iron Tempest II", genres: ["Action"], rating: 7.8 },
-	],
+	],*/
 
 	tv: [
 		{ title: "Stranger Things", genres: ["Sci-fi", "Teen"], rating: 8.5 },
