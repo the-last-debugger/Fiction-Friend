@@ -1,41 +1,39 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTaste } from "@/context/TasteContext";
-import {
-	recommendations,
-	type RecommendationItem,
-} from "@/data/recommendations";
+import { recommendations } from "@/data/recommendations";
+
+import type { RecommendationItem } from "@/data/recommendations";
+
+import { usePageFadeIn } from "@/hooks/usePageFadeIn";
+import { useFilteredRecommendations } from "@/hooks/useFilteredRecommendations";
+import { useProgressiveLoad } from "@/hooks/useProgressiveLoad";
+
+import RecommendationCard from "@/components/RecommendationCard";
+import SearchBar from "@/components/SearchBar";
 import Details from "./Details";
 import RecommendationsSkeleton from "@/components/RecommendationsSkeleton";
 
 function Recommendations() {
-	const [loading, setLoading] = useState(true);
-
-	useEffect(() => {
-		const timer = setTimeout(() => setLoading(false), 800);
-		return () => clearTimeout(timer);
-	}, []);
+	const loading = usePageFadeIn();
 
 	const [params] = useSearchParams();
 	const category = params.get("category") as keyof typeof recommendations;
 
 	const { selectedGenres } = useTaste();
-
 	const items = recommendations[category] || [];
+
+	const filtered = useFilteredRecommendations(items, selectedGenres);
+
+	const { visibleCount, loadMore, sentinelRef, reachedLimit, reachedEnd } =
+		useProgressiveLoad(filtered.length);
+
+	const visibleItems = filtered.slice(0, visibleCount);
 
 	const [activeItem, setActiveItem] = useState<RecommendationItem | null>(null);
 
-	const filtered = items
-		.filter((item) => item.genres.some((g) => selectedGenres.includes(g)))
-		.sort((a, b) => {
-			const ratingA = typeof a.rating === "number" ? a.rating : 0;
-			const ratingB = typeof b.rating === "number" ? b.rating : 0;
-			return ratingB - ratingA;
-		});
-
 	return (
 		<div className="relative bg-black min-h-screen text-white">
-			{/* REAL CONTENT (always mounted, fades in) */}
 			<div
 				className={`p-12 transition-opacity duration-700 ${
 					loading ? "opacity-0" : "opacity-100"
@@ -43,50 +41,44 @@ function Recommendations() {
 			>
 				<h1 className="text-3xl mb-6">Your {category} Recommendations</h1>
 
-				{!loading && filtered.length === 0 && (
+				<SearchBar category={category} />
+
+				{filtered.length === 0 && !loading && (
 					<p className="text-red-600 mb-6">
 						No matches found. Try selecting more genres.
 					</p>
 				)}
 
-				{/* Search bar */}
-				<div className="mb-6">
-					<input
-						type="text"
-						placeholder={`Search ${category}...`}
-						className="w-full p-3 bg-white/10 border border-white/20 rounded-md text-white placeholder-white/40"
-					/>
-				</div>
-
-				{/* Grid */}
 				<div className="grid grid-cols-3 w-full gap-6">
-					{filtered.map((item) => (
-						<div
+					{visibleItems.map((item) => (
+						<RecommendationCard
 							key={item.title}
-							className="w-full flex flex-col items-center cursor-pointer"
+							item={item}
 							onClick={() => setActiveItem(item)}
-						>
-							<section className="w-40 h-56 bg-white rounded-md mb-3" />
-
-							<h2 className="text-center text-lg font-semibold">
-								{item.title}
-								{item.rating && (
-									<span className="opacity-70">({item.rating.toFixed(1)})</span>
-								)}
-							</h2>
-						</div>
+						/>
 					))}
 				</div>
+
+				{!reachedLimit && !reachedEnd && (
+					<div ref={sentinelRef} className="h-10" />
+				)}
+
+				{reachedLimit && !reachedEnd && (
+					<button
+						onClick={loadMore}
+						className="mt-6 px-6 py-3 bg-white/10 border border-white/20 rounded-lg text-white hover:bg-white/20 transition"
+					>
+						Load More
+					</button>
+				)}
 			</div>
 
-			{/* SKELETON OVERLAY */}
 			{loading && (
 				<div className="absolute inset-0 z-30 bg-black">
 					<RecommendationsSkeleton />
 				</div>
 			)}
 
-			{/* Modal */}
 			{activeItem && (
 				<Details item={activeItem} onClose={() => setActiveItem(null)} />
 			)}

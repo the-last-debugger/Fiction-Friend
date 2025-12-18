@@ -31,7 +31,7 @@ function Details({ item, onClose }: DetailsProps) {
 			{/* REAL MODAL */}
 			<div
 				className={`
-          bg-white/10 border border-white/20 p-6 rounded-xl w-[400px] text-white relative
+          bg-black/10 border border-white/20 p-6 rounded-xl w-[400px] text-white relative
           transition-opacity duration-500
           ${closing ? "opacity-0" : ""}
           ${loading ? "opacity-0" : "opacity-100"}

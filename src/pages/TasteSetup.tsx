@@ -66,7 +66,7 @@ function TasteSetup() {
 
 				<div className="flex gap-10 w-full justify-center items-center mt-24">
 					<button
-						className="text-white transition hover:scale-130 hover:text-black hover:opacity-80"
+						className="text-white transition hover:scale-130 hover:text-black hover:opacity-80 cursor-pointer"
 						onClick={() => navigate(-1)}
 					>
 						<ArrowLeftIcon />
@@ -74,7 +74,7 @@ function TasteSetup() {
 
 					<button
 						onClick={() => navigate(`/recommendations?category=${category}`)}
-						className="font-semibold py-2 px-4 bg-red-500 rounded-sm hover:scale-110 hover:text-white transition"
+						className="font-semibold py-2 px-4 bg-red-500 rounded-sm hover:scale-110 hover:text-red-500 hover:bg-white transition cursor-pointer"
 					>
 						Continue
 					</button>
