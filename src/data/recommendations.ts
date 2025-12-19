@@ -1,9 +1,15 @@
 export type RecommendationItem = {
 	title: string;
-	genres: string[];
-	rating?: number;
 	poster?: string | null;
-	backdrop?: string | null;
+	genres: string[];
+	rating: number;
+	releaseDate?: string;
+	runtime?: number;
+	tagline?: string; // short marketing phrase
+	overview?: string; // plot description
+	cast?: { name: string; character: string }[];
+	trailerKey?: string;
+	popularity?: number;
 };
 
 export const recommendations: Record<string, RecommendationItem[]> = {
