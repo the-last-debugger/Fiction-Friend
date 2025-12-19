@@ -25,7 +25,6 @@ const genreMap: Record<number, string> = {
 	37: "Western",
 };
 
-// reverse lookup: genre name → TMDB ID
 const nameToId = Object.fromEntries(
 	Object.entries(genreMap).map(([id, name]) => [name, Number(id)])
 );
@@ -60,19 +59,48 @@ export function useMovies(selectedGenres: string[]) {
 				return;
 			}
 
-			const mapped: RecommendationItem[] = json.results.map((m: any) => ({
-				title: m.title,
-				genres: m.genre_ids.map((id: number) => genreMap[id] || "Unknown"),
-				rating: m.vote_average,
-				poster: m.poster_path
-					? `https://image.tmdb.org/t/p/w500${m.poster_path}`
-					: null,
-				backdrop: m.backdrop_path
-					? `https://image.tmdb.org/t/p/w780${m.backdrop_path}`
-					: null,
-			}));
+			// enrich each movie with details
+			const enriched: RecommendationItem[] = await Promise.all(
+				json.results.map(async (m: any) => {
+					try {
+						const details = await tmdb(`/movie/${m.id}?language=en-US`);
+						return {
+							title: m.title,
+							genres: details.genres?.map((g: any) => g.name) || [],
+							rating: m.vote_average,
+							poster: m.poster_path
+								? `https://image.tmdb.org/t/p/w500${m.poster_path}`
+								: null,
+							backdrop: m.backdrop_path
+								? `https://image.tmdb.org/t/p/w780${m.backdrop_path}`
+								: null,
+							releaseDate: details.release_date,
+							runtime: details.runtime,
+							tagline: details.tagline,
+							overview: details.overview,
+							popularity: details.popularity,
+						};
+					} catch {
+						// fallback if details call fails
+						return {
+							title: m.title,
+							genres: m.genre_ids.map(
+								(id: number) => genreMap[id] || "Unknown"
+							),
+							rating: m.vote_average,
+							poster: m.poster_path
+								? `https://image.tmdb.org/t/p/w500${m.poster_path}`
+								: null,
+							backdrop: m.backdrop_path
+								? `https://image.tmdb.org/t/p/w780${m.backdrop_path}`
+								: null,
+						};
+					}
+				})
+			);
 
-			setData((prev) => [...prev, ...mapped]);
+			setData((prev) => [...prev, ...enriched]);
+			setHasMore(p < json.total_pages);
 		} catch (err) {
 			console.error("Failed to fetch movies:", err);
 			setHasMore(false);
