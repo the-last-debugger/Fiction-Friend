@@ -1,5 +1,5 @@
 // src/pages/Recommendations.tsx
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTaste } from "@/context/TasteContext";
 import { recommendations } from "@/data/recommendations";
@@ -9,8 +9,8 @@ import type { RecommendationItem } from "@/data/recommendations";
 import { usePageFadeIn } from "@/hooks/usePageFadeIn";
 import { useFilteredRecommendations } from "@/hooks/useFilteredRecommendations";
 import { useProgressiveLoad } from "@/hooks/useProgressiveLoad";
-
 import { useMovies } from "@/hooks/useMovies";
+import { useInfiniteScroll } from "@/hooks/useInfiniteScroll"; //
 
 import RecommendationCard from "@/components/RecommendationCard";
 import SearchBar from "@/components/SearchBar";
@@ -25,7 +25,7 @@ function Recommendations() {
 
 	const { selectedGenres } = useTaste();
 
-	// ✅ Movies now use discover endpoint with genre filtering
+	// Movies now use discover endpoint with genre filtering
 	const {
 		data: movieData,
 		loading: movieLoading,
@@ -33,29 +33,37 @@ function Recommendations() {
 		hasMore: hasMoreMovies,
 	} = useMovies(selectedGenres);
 
-	// ✅ Choose data source
+	// Infinite scroll only for movies
+	const movieSentinelRef = useInfiniteScroll(
+		useCallback(() => loadMoreMovies(), [loadMoreMovies]),
+		hasMoreMovies,
+		movieLoading
+	);
+
+	//  Choose data source
 	const items =
 		category === "movie" ? movieData : recommendations[category] || [];
 
-	// ✅ Combined loading state
+	//  Combined loading state
 	const isLoading = pageLoading || (category === "movie" && movieLoading);
 
-	// ✅ Only apply local filtering for non-movie categories
+	// Only apply local filtering for non-movie categories
 	const filtered =
 		category === "movie"
 			? items
 			: useFilteredRecommendations(items, selectedGenres);
 
-	// ✅ Progressive load for non-movie categories
+	// Progressive load for non-movie categories
 	const { visibleCount, loadMore, sentinelRef, reachedLimit, reachedEnd } =
-		useProgressiveLoad(filtered.length);
+		useProgressiveLoad(category === "movie" ? 0 : filtered.length);
 
-	const visibleItems = filtered.slice(0, visibleCount);
+	const visibleItems =
+		category === "movie" ? filtered : filtered.slice(0, visibleCount);
 
-	// ✅ Details modal
+	// Details modal
 	const [activeItem, setActiveItem] = useState<RecommendationItem | null>(null);
 
-	// ✅ Infinite scroll trigger
+	// Infinite scroll trigger
 	function handleLoadMore() {
 		if (category === "movie") {
 			loadMoreMovies();
@@ -90,15 +98,20 @@ function Recommendations() {
 				</div>
 
 				{/* sentinel triggers infinite scroll */}
-				{!reachedLimit && !reachedEnd && (
-					<div
-						ref={sentinelRef}
-						className="h-10"
-						onClick={handleLoadMore} // fallback if IntersectionObserver fails
-					/>
+				{category === "movie" ? (
+					<div ref={movieSentinelRef} className="h-10" />
+				) : (
+					!reachedLimit &&
+					!reachedEnd && (
+						<div
+							ref={sentinelRef}
+							className="h-10"
+							onClick={handleLoadMore} // fallback if IntersectionObserver fails
+						/>
+					)
 				)}
 
-				{reachedLimit && !reachedEnd && (
+				{reachedLimit && !reachedEnd && category !== "movie" && (
 					<button
 						onClick={handleLoadMore}
 						className="mt-6 px-6 py-3 bg-white/10 border border-white/20 rounded-lg text-white hover:bg-white/20 transition"
